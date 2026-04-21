@@ -382,7 +382,7 @@ git branch --merged dev
 工具应为交互式 CLI。
 
 ### 11.1 顶层菜单
-用户运行 `wt` 后，应显示主菜单，例如：
+用户运行 `ccl` 后，应显示主菜单，例如：
 
 ```text
 请选择操作:
@@ -436,7 +436,7 @@ Path: ~/.worktrees/payment-service/alice-fix-login-timeout
 ### 12.1 限制说明
 普通可执行脚本无法改变父 shell 的当前工作目录，因此：
 
-- 不能指望 `./wt.sh` 执行完之后用户终端自动停在目标 worktree 目录
+- 不能指望 `./ccl.sh` 执行完之后用户终端自动停在目标 worktree 目录
 - 必须使用 shell function 包装
 
 ### 12.2 推荐实现方式
@@ -462,7 +462,7 @@ Path: ~/.worktrees/payment-service/alice-fix-login-timeout
 最终用户入口应为一个 shell function，例如：
 
 ```bash
-wt
+ccl
 ```
 
 该函数应集成到 `.zshrc` 或 `.bashrc`。
@@ -530,8 +530,8 @@ wt
 下面是本工具第一版的核心验收标准。
 
 ### 15.1 新任务创建
-- 在仓库任意子目录运行 `wt`
-- 选择“新任务”
+- 在仓库任意子目录运行 `ccl`
+- 选择”新任务”
 - 输入任务名后，脚本能正确 slug 化
 - 默认提供 `dev` 作为基线分支（若存在）
 - 成功创建新 branch 和新 worktree
@@ -539,21 +539,21 @@ wt
 - 能启动 `codex` 或 `claude`
 
 ### 15.2 继续已有任务
-- 在仓库任意子目录运行 `wt`
-- 选择“继续已有 worktree”
+- 在仓库任意子目录运行 `ccl`
+- 选择”继续已有 worktree”
 - 正确列出该仓库的 worktree
 - 选择后成功进入对应目录
 - 能启动 `codex` 或 `claude`
 
 ### 15.3 删除已合并 worktree
-- 在仓库任意子目录运行 `wt`
-- 选择“删除已合并的 worktree”
+- 在仓库任意子目录运行 `ccl`
+- 选择”删除已合并的 worktree”
 - 仅列出已合并到 `dev` 且无未提交改动的附加 worktree
 - 选择后成功删除 worktree 和 branch
 - 若条件不满足，则拒绝删除并给出明确提示
 
 ### 15.4 shell 行为
-- 用户执行 `wt` 后，shell 当前目录应真正切换到目标 worktree
+- 用户执行 `ccl` 后，shell 当前目录应真正切换到目标 worktree
 - 不能只是子进程内部切换目录
 
 ---
@@ -638,7 +638,7 @@ LAUNCH_TOOL=codex
 | **项目** | **要求** |
 |---|---|
 | 运行环境 | macOS / Linux，Bash 或 Zsh |
-| 用户入口 | `wt` shell function |
+| 用户入口 | `ccl` shell function |
 | 核心能力 | 新任务、继续已有 worktree、删除已合并 worktree |
 | worktree 根目录 | `~/.worktrees/<repo-name>/` |
 | repo-name | 当前 Git 仓库根目录名 |

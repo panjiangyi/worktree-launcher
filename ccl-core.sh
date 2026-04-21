@@ -463,7 +463,7 @@ delete_worktree() {
 
 show_help() {
   cat >&2 << 'EOF'
-用法: wt [命令]
+用法: ccl [命令]
 
 命令:
   setup    创建或编辑项目级 setup 脚本

@@ -1,10 +1,10 @@
-wt() {
+ccl() {
   local script_dir script output target_path launch_tool
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  script="$script_dir/wt-core.sh"
+  script="$script_dir/ccl-core.sh"
 
   if [[ ! -x "$script" ]]; then
-    printf 'wt core script not executable: %s\n' "$script" >&2
+    printf 'ccl core script not executable: %s\n' "$script" >&2
     return 1
   fi
 
