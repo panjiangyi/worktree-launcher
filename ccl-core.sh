@@ -407,7 +407,9 @@ run_setup_script() {
 
   warn "Running setup script..."
   local setup_rc=0
-  (cd "$worktree_path" && bash "$setup_script") || setup_rc=$?
+  # Stdout from ccl-core is reserved for the shell snippet consumed by ccl-shell.
+  # Route setup script output to stderr so it stays visible without being eval'd.
+  (cd "$worktree_path" && bash "$setup_script" >&2) || setup_rc=$?
 
   if [[ $setup_rc -ne 0 ]]; then
     warn "Setup script failed (exit code: $setup_rc), but the worktree was kept"
