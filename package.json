@@ -12,7 +12,8 @@
     "README.md"
   ],
   "scripts": {
-    "pack:dry-run": "npm pack --dry-run"
+    "pack:dry-run": "npm pack --dry-run",
+    "release": "bash ./scripts/release.sh"
   },
   "keywords": [
     "git",
