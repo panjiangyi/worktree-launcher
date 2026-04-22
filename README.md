@@ -1,18 +1,18 @@
-# Claude Code Launcher
+# cc-launcher
 
 Git worktree 任务启动器。提供一个统一的 `ccl` 入口，用于创建、进入和清理 Git worktree，并可在目标目录中启动 `codex` 或 `claude`。
 
 ## 安装
 
 ```bash
-git clone git@github.com:panjiangyi/claude-code-launcher.git ~/claude-code-launcher
-chmod +x ~/claude-code-launcher/ccl-core.sh
+git clone git@github.com:panjiangyi/cc-launcher.git ~/cc-launcher
+chmod +x ~/cc-launcher/ccl-core.sh
 ```
 
 在 `~/.zshrc` 或 `~/.bashrc` 中添加：
 
 ```bash
-source ~/claude-code-launcher/ccl-shell.sh
+source ~/cc-launcher/ccl-shell.sh
 ```
 
 然后重新加载 shell：

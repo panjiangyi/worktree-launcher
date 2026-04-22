@@ -1,5 +1,5 @@
 
-# Git Worktree 任务启动脚本 PRD
+# cc-launcher PRD
 
 本文档定义一个基于 Git worktree 的命令行脚本工具，用于帮助开发者在一个仓库内高效管理多个并行任务，并在选定的 worktree 中启动 `codex` 或 `claude`。
 
@@ -663,4 +663,3 @@ LAUNCH_TOOL=codex
 3. 安装说明  
 4. 测试步骤  
 5. 已知限制说明
-
