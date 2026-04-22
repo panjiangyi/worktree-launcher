@@ -1,6 +1,6 @@
 {
   "name": "cc-launch",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Git worktree launcher with shell integration for Codex and Claude workflows",
   "bin": {
     "ccl": "bin/ccl"
