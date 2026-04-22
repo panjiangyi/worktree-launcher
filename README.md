@@ -1,24 +1,38 @@
-# cc-launcher
+# cc-launch
 
 Git worktree 任务启动器。提供一个统一的 `ccl` 入口，用于创建、进入和清理 Git worktree，并可在目标目录中启动 `codex` 或 `claude`。
 
 ## 安装
 
 ```bash
-git clone git@github.com:panjiangyi/cc-launcher.git ~/cc-launcher
-chmod +x ~/cc-launcher/ccl-core.sh
+npm install -g cc-launch
 ```
 
-在 `~/.zshrc` 或 `~/.bashrc` 中添加：
+然后把 shell 集成加到配置文件，这一步是必须的；否则独立 CLI 进程无法修改你当前终端的目录：
 
 ```bash
-source ~/cc-launcher/ccl-shell.sh
+echo 'eval "$(command ccl init zsh)"' >> ~/.zshrc
 ```
 
 然后重新加载 shell：
 
 ```bash
 source ~/.zshrc
+```
+
+如果你使用 Bash：
+
+```bash
+echo 'eval "$(command ccl init bash)"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+本地开发安装：
+
+```bash
+git clone git@github.com:panjiangyi/cc-launch.git ~/cc-launch
+chmod +x ~/cc-launch/ccl-core.sh ~/cc-launch/bin/ccl
+source ~/cc-launch/ccl-shell.sh
 ```
 
 ## 使用说明
@@ -57,6 +71,27 @@ LAUNCH_TOOL='codex'
 
 包装函数会解析这两个字段，进入目标目录并按需执行工具命令。
 
+## 发布到 npm
+
+发布前检查打包内容：
+
+```bash
+npm pack --dry-run
+```
+
+登录并发布：
+
+```bash
+npm login
+npm publish
+```
+
+如果你后续改成 scoped 包，例如 `@panjiangyi/cc-launch`，公开发布需要：
+
+```bash
+npm publish --access public
+```
+
 ## 测试步骤
 
 1. 在 Git 仓库任意子目录运行 `ccl`，选择"新任务"，输入 `fix login timeout`，确认生成分支 `$(id -un)/fix-login-timeout` 风格名称。
@@ -74,6 +109,8 @@ LAUNCH_TOOL='codex'
 
 ## 文件
 
+- `package.json` — npm 包元数据和 `ccl` bin 入口声明
+- `bin/ccl` — npm 全局命令入口，转发到核心脚本
 - `ccl-core.sh` — 交互式核心脚本，负责 Git 逻辑并输出 `TARGET_PATH` / `LAUNCH_TOOL`
 - `ccl-shell.sh` — shell function，负责 `cd` 和启动工具
 - `prd.md` — 原始需求文档

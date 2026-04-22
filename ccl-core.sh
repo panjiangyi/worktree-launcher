@@ -213,18 +213,36 @@ prompt_menu() {
   return 1
 }
 
-repo_root="$(require_git_repo)"
-repo_name="$(basename "$repo_root")"
-_git_username="$(git config user.name 2>/dev/null || true)"
-if [[ -z "$_git_username" ]]; then
-  die "未设置 git user.name，请先运行: git config --global user.name 'Your Name'"
-fi
-username="$(slugify "$_git_username")"
-worktree_repo_dir="$HOME/.worktrees/$repo_name"
-config_path="$worktree_repo_dir/config.json"
+repo_root=""
+repo_name=""
+username=""
+worktree_repo_dir=""
+config_path=""
 main_branch=""
+repo_context_loaded=0
+
+ensure_repo_context() {
+  if (( repo_context_loaded == 1 )); then
+    return 0
+  fi
+
+  repo_root="$(require_git_repo)"
+  repo_name="$(basename "$repo_root")"
+
+  local git_username
+  git_username="$(git config user.name 2>/dev/null || true)"
+  if [[ -z "$git_username" ]]; then
+    die "未设置 git user.name，请先运行: git config --global user.name 'Your Name'"
+  fi
+
+  username="$(slugify "$git_username")"
+  worktree_repo_dir="$HOME/.worktrees/$repo_name"
+  config_path="$worktree_repo_dir/config.json"
+  repo_context_loaded=1
+}
 
 ensure_worktree_repo_dir() {
+  ensure_repo_context
   mkdir -p "$worktree_repo_dir"
 }
 
@@ -715,6 +733,7 @@ show_help() {
 
 命令:
   setup    创建或编辑项目级 setup 脚本
+  init     输出 shell 集成脚本（支持 zsh/bash）
   help     显示此帮助信息
 
 无参数运行时进入交互模式:
@@ -729,12 +748,59 @@ setup 脚本位于 ~/.worktrees/<repo-name>/setup.sh
 EOF
 }
 
+print_shell_init() {
+  local shell_name="${1:-}"
+  case "$shell_name" in
+    zsh|bash) ;;
+    *)
+      die "init 仅支持 zsh 或 bash"
+      ;;
+  esac
+
+  cat <<'EOF'
+ccl() {
+  local output target_path launch_tool
+
+  if ! output="$(command ccl "$@")"; then
+    return $?
+  fi
+
+  eval "$output"
+
+  if [[ -n "${TARGET_PATH:-}" ]]; then
+    cd "$TARGET_PATH" || return 1
+  fi
+
+  launch_tool="${LAUNCH_TOOL:-none}"
+  case "$launch_tool" in
+    codex|claude)
+      if command -v "$launch_tool" >/dev/null 2>&1; then
+        "$launch_tool"
+      else
+        printf '%s 命令不存在于 PATH 中，已停留在目标目录：%s\n' "$launch_tool" "$PWD" >&2
+      fi
+      ;;
+    none|"")
+      ;;
+    *)
+      printf '未知启动工具：%s\n' "$launch_tool" >&2
+      return 1
+      ;;
+  esac
+}
+EOF
+}
+
 main() {
   if [[ $# -gt 0 ]]; then
     case "$1" in
       setup)
         ensure_project_config || exit 1
         edit_setup_script
+        ;;
+      init)
+        [[ $# -eq 2 ]] || die "用法: ccl init <zsh|bash>"
+        print_shell_init "$2"
         ;;
       -h|--help|help) show_help ;;
       *) die "未知命令: $1" ;;

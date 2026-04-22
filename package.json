@@ -1,0 +1,25 @@
+{
+  "name": "cc-launch",
+  "version": "0.1.0",
+  "description": "Git worktree launcher with shell integration for Codex and Claude workflows",
+  "bin": {
+    "ccl": "bin/ccl"
+  },
+  "files": [
+    "bin",
+    "ccl-core.sh",
+    "ccl-shell.sh",
+    "README.md"
+  ],
+  "scripts": {
+    "pack:dry-run": "npm pack --dry-run"
+  },
+  "keywords": [
+    "git",
+    "worktree",
+    "cli",
+    "codex",
+    "claude"
+  ],
+  "license": "UNLICENSED"
+}
