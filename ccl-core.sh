@@ -25,6 +25,22 @@ require_git_repo() {
   printf '%s\n' "$repo_root"
 }
 
+require_common_git_dir() {
+  local common_dir
+  if ! common_dir="$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null)"; then
+    return 1
+  fi
+  printf '%s\n' "$common_dir"
+}
+
+resolve_main_worktree_root() {
+  local common_dir="$1"
+  local main_root
+
+  main_root="$(cd "$common_dir/.." 2>/dev/null && pwd -P)" || return 1
+  printf '%s\n' "$main_root"
+}
+
 slugify() {
   local input slug
   input="${1#"${1%%[![:space:]]*}"}"
@@ -49,6 +65,7 @@ render_menu() {
   local selected="$3"
   shift 3
   local options=("$@")
+  local help_text="Use ↑/↓ to move, Enter to confirm"
 
   if (( PROMPT_MENU_RENDERED_LINES > 0 )); then
     printf '\033[%dA\r\033[J' "$PROMPT_MENU_RENDERED_LINES" >&"$menu_fd"
@@ -65,8 +82,8 @@ render_menu() {
     fi
   done
 
-  printf '\nUse ↑/↓ to move, Enter to confirm, mouse wheel/click if supported\n' >&"$menu_fd"
-  PROMPT_MENU_RENDERED_LINES=$((${#options[@]} + 3))
+  printf '\n%s\n' "$help_text" >&"$menu_fd"
+  PROMPT_MENU_RENDERED_LINES="$(menu_rendered_lines "$title" "$help_text" "${options[@]}")"
 }
 
 PROMPT_MENU_FD=""
@@ -109,6 +126,48 @@ menu_move_down() {
   else
     printf '%s\n' "$((selected + 1))"
   fi
+}
+
+get_terminal_columns() {
+  local cols
+  cols="$(stty size < /dev/tty 2>/dev/null | awk '{print $2}')" || cols=""
+  if [[ ! "$cols" =~ ^[0-9]+$ ]] || (( cols <= 0 )); then
+    cols=80
+  fi
+  printf '%s\n' "$cols"
+}
+
+wrapped_line_count() {
+  local text="$1"
+  local cols="$2"
+  local line length total=0
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    length=${#line}
+    total=$((total + ((length / cols) + 1)))
+  done <<< "$text"
+
+  printf '%s\n' "$total"
+}
+
+menu_rendered_lines() {
+  local title="$1"
+  local help_text="$2"
+  shift 2
+  local options=("$@")
+  local cols total i option_text
+
+  cols="$(get_terminal_columns)"
+  total="$(wrapped_line_count "$title" "$cols")"
+
+  for i in "${!options[@]}"; do
+    option_text="  ${options[$i]}"
+    total=$((total + $(wrapped_line_count "$option_text" "$cols")))
+  done
+
+  total=$((total + 1))
+  total=$((total + $(wrapped_line_count "$help_text" "$cols")))
+  printf '%s\n' "$total"
 }
 
 prompt_menu() {
@@ -241,6 +300,7 @@ prompt_menu() {
 }
 
 repo_root=""
+current_worktree_root=""
 repo_name=""
 username=""
 worktree_repo_dir=""
@@ -253,8 +313,15 @@ ensure_repo_context() {
     return 0
   fi
 
-  if ! repo_root="$(require_git_repo)"; then
+  if ! current_worktree_root="$(require_git_repo)"; then
     die "Current directory is not inside a Git repository"
+  fi
+  local common_git_dir
+  if ! common_git_dir="$(require_common_git_dir)"; then
+    die "Failed to determine the repository common Git directory"
+  fi
+  if ! repo_root="$(resolve_main_worktree_root "$common_git_dir")"; then
+    die "Failed to determine the main worktree directory"
   fi
   repo_name="$(basename "$repo_root")"
 
@@ -853,4 +920,6 @@ main() {
   esac
 }
 
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
+fi

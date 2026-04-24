@@ -50,3 +50,11 @@ Setup command:
 - Run `ccl setup` to create or edit the project-level setup script
 - The script is stored at `~/.worktrees/<repo-name>/setup.sh`
 - It runs automatically after a new worktree is created, which is useful for steps like installing dependencies or copying `.env` files
+
+## Development
+
+Run the regression test suite with:
+
+```bash
+npm test
+```
